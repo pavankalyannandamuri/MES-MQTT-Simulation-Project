@@ -41,3 +41,6 @@ plant1/line1/machine01/temp
 - MQTT event-driven architecture
 - MES data modeling
 - Real-time analytics
+<img width="1920" height="1080" alt="Screenshot (33)" src="https://github.com/user-attachments/assets/98117305-9adc-4968-a01e-753a22dd2255" />
+<img width="1920" height="1080" alt="Screenshot (34)" src="https://github.com/user-attachments/assets/9ac157de-a2b7-4f4b-bf1e-7df3b9c84d6b" />
+<img width="1920" height="1080" alt="Screenshot (35)" src="https://github.com/user-attachments/assets/41a810ff-9842-436a-a2dd-166e019b9193" />
