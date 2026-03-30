@@ -1,0 +1,632 @@
+[
+    {
+        "id": "dc07687401529c2f",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "tab_mes_logic_1",
+        "type": "tab",
+        "label": "MES Logic",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "tab_mes_dashboard_1",
+        "type": "tab",
+        "label": "MES Dashboard",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "broker1",
+        "type": "mqtt-broker",
+        "name": "Local Mosquitto",
+        "broker": "localhost",
+        "port": "1883"
+    },
+    {
+        "id": "ui_base_1",
+        "type": "ui-base",
+        "name": "MES Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": true
+    },
+    {
+        "id": "ui_theme_1",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#1976d2",
+            "bgPage": "#f5f5f5",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        }
+    },
+    {
+        "id": "ui_page_1",
+        "type": "ui-page",
+        "name": "Machine 01",
+        "ui": "ui_base_1",
+        "path": "/machine01",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "ui_theme_1"
+    },
+    {
+        "id": "ui_group_1",
+        "type": "ui-group",
+        "name": "Live Machine Data",
+        "page": "ui_page_1",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true
+    },
+    {
+        "id": "inject1",
+        "type": "inject",
+        "z": "dc07687401529c2f",
+        "d": true,
+        "name": "Every 2 sec",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 90,
+        "y": 440,
+        "wires": [
+            [
+                "function1"
+            ]
+        ]
+    },
+    {
+        "id": "function1",
+        "type": "function",
+        "z": "dc07687401529c2f",
+        "name": "Machine Simulator",
+        "func": "let count = flow.get(\"count\") || 0;\nlet running = flow.get(\"running\");\n\nif (running === undefined) running = true;\n\nif (Math.random() < 0.2) running = !running;\n\nif (running) count += 5;\n\nlet temp = running ? (70 + Math.random()*10) : (60 + Math.random()*5);\n\nflow.set(\"count\", count);\nflow.set(\"running\", running);\n\nreturn [\n { topic: \"plant1/line1/machine01/state\", payload: running ? \"RUNNING\" : \"STOPPED\" },\n { topic: \"plant1/line1/machine01/count\", payload: count },\n { topic: \"plant1/line1/machine01/temp\", payload: Number(temp.toFixed(1)) }\n];",
+        "outputs": 3,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 440,
+        "wires": [
+            [
+                "mqtt1"
+            ],
+            [
+                "mqtt2"
+            ],
+            [
+                "mqtt3"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt1",
+        "type": "mqtt out",
+        "z": "dc07687401529c2f",
+        "name": "State",
+        "topic": "",
+        "qos": "1",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "broker1",
+        "x": 540,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "mqtt2",
+        "type": "mqtt out",
+        "z": "dc07687401529c2f",
+        "name": "Count",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "broker": "broker1",
+        "x": 540,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "mqtt3",
+        "type": "mqtt out",
+        "z": "dc07687401529c2f",
+        "name": "Temp",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "broker": "broker1",
+        "x": 540,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "mqtt_in_state_1",
+        "type": "mqtt in",
+        "z": "tab_mes_logic_1",
+        "name": "State In",
+        "topic": "plant1/line1/machine01/state",
+        "qos": "1",
+        "datatype": "auto",
+        "broker": "broker1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 100,
+        "wires": [
+            [
+                "fn_mes_logic_1"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_in_count_1",
+        "type": "mqtt in",
+        "z": "tab_mes_logic_1",
+        "name": "Count In",
+        "topic": "plant1/line1/machine01/count",
+        "qos": "1",
+        "datatype": "auto",
+        "broker": "broker1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 160,
+        "wires": [
+            [
+                "fn_mes_logic_1"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_in_temp_1",
+        "type": "mqtt in",
+        "z": "tab_mes_logic_1",
+        "name": "Temp In",
+        "topic": "plant1/line1/machine01/temp",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "broker1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 220,
+        "wires": [
+            [
+                "fn_mes_logic_1"
+            ]
+        ]
+    },
+    {
+        "id": "fn_mes_logic_1",
+        "type": "function",
+        "z": "tab_mes_logic_1",
+        "name": "MES Logic",
+        "func": "let data = flow.get('mesData') || {\n    state: 'UNKNOWN',\n    count: 0,\n    temp: 0,\n    downtimeSeconds: 0,\n    runtimeSeconds: 0,\n    goodCount: 0,\n    rejectCount: 0,\n    idealRunRatePerMin: 150,\n    startTs: Date.now(),\n    lastTs: Date.now(),\n    lastCount: 0\n};\n\nconst now = Date.now();\nlet elapsed = (now - data.lastTs) / 1000;\nif (elapsed < 0 || elapsed > 10) elapsed = 0;\ndata.lastTs = now;\n\nif (msg.topic.endsWith('/state')) {\n    data.state = String(msg.payload);\n}\nif (msg.topic.endsWith('/count')) {\n    data.count = Number(msg.payload);\n}\nif (msg.topic.endsWith('/temp')) {\n    data.temp = Number(msg.payload);\n}\n\nif (data.state === 'RUNNING') {\n    data.runtimeSeconds += elapsed;\n} else if (data.state === 'STOPPED') {\n    data.downtimeSeconds += elapsed;\n}\n\nconst producedDelta = Math.max(0, data.count - data.lastCount);\ndata.lastCount = data.count;\n\nif (producedDelta > 0) {\n    const rejects = Math.random() < 0.15 ? 1 : 0;\n    const good = Math.max(0, producedDelta - rejects);\n    data.goodCount += good;\n    data.rejectCount += rejects;\n}\n\nconst plannedTime = data.runtimeSeconds + data.downtimeSeconds;\nconst availability = plannedTime > 0 ? data.runtimeSeconds / plannedTime : 0;\nconst actualRatePerMin = data.runtimeSeconds > 0 ? (data.count / data.runtimeSeconds) * 60 : 0;\nconst performance = data.idealRunRatePerMin > 0 ? actualRatePerMin / data.idealRunRatePerMin : 0;\nconst totalProduced = data.goodCount + data.rejectCount;\nconst quality = totalProduced > 0 ? data.goodCount / totalProduced : 1;\nconst oee = availability * performance * quality;\n\nconst out = {\n    state: data.state,\n    count: data.count,\n    temp: data.temp,\n    runtimeSeconds: Math.floor(data.runtimeSeconds),\n    downtimeSeconds: Math.floor(data.downtimeSeconds),\n    goodCount: data.goodCount,\n    rejectCount: data.rejectCount,\n    availability: Number((availability * 100).toFixed(2)),\n    performance: Number((performance * 100).toFixed(2)),\n    quality: Number((quality * 100).toFixed(2)),\n    oee: Number((oee * 100).toFixed(2))\n};\n\nglobal.set('mesData', data);\nreturn { payload: out };",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 160,
+        "wires": [
+            [
+                "debug_mes_1"
+            ]
+        ]
+    },
+    {
+        "id": "debug_mes_1",
+        "type": "debug",
+        "z": "tab_mes_logic_1",
+        "name": "MES Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 580,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "mqtt_in_state_dash",
+        "type": "mqtt in",
+        "z": "tab_mes_dashboard_1",
+        "name": "State In",
+        "topic": "plant1/line1/machine01/state",
+        "qos": "1",
+        "datatype": "auto",
+        "broker": "broker1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 80,
+        "wires": [
+            [
+                "fn_state_dash"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_in_count_dash",
+        "type": "mqtt in",
+        "z": "tab_mes_dashboard_1",
+        "name": "Count In",
+        "topic": "plant1/line1/machine01/count",
+        "qos": "1",
+        "datatype": "auto",
+        "broker": "broker1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 140,
+        "wires": [
+            [
+                "fn_count_dash"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_in_temp_dash",
+        "type": "mqtt in",
+        "z": "tab_mes_dashboard_1",
+        "name": "Temp In",
+        "topic": "plant1/line1/machine01/temp",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "broker1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 200,
+        "wires": [
+            [
+                "fn_temp_dash"
+            ]
+        ]
+    },
+    {
+        "id": "inject_oee_tick",
+        "type": "inject",
+        "z": "tab_mes_dashboard_1",
+        "name": "Refresh OEE",
+        "repeat": "2",
+        "once": true,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 280,
+        "wires": [
+            [
+                "fn_oee_dash"
+            ]
+        ]
+    },
+    {
+        "id": "fn_state_dash",
+        "type": "function",
+        "z": "tab_mes_dashboard_1",
+        "name": "State Payload",
+        "func": "return { payload: msg.payload };",
+        "outputs": 1,
+        "x": 330,
+        "y": 80,
+        "wires": [
+            [
+                "ui_text_state"
+            ]
+        ]
+    },
+    {
+        "id": "fn_count_dash",
+        "type": "function",
+        "z": "tab_mes_dashboard_1",
+        "name": "Count Payload",
+        "func": "return { payload: msg.payload };",
+        "outputs": 1,
+        "x": 330,
+        "y": 140,
+        "wires": [
+            [
+                "ui_text_count"
+            ]
+        ]
+    },
+    {
+        "id": "fn_temp_dash",
+        "type": "function",
+        "z": "tab_mes_dashboard_1",
+        "name": "Temp Payload",
+        "func": "return { payload: msg.payload };",
+        "outputs": 1,
+        "x": 330,
+        "y": 200,
+        "wires": [
+            [
+                "ui_gauge_temp"
+            ]
+        ]
+    },
+    {
+        "id": "fn_oee_dash",
+        "type": "function",
+        "z": "tab_mes_dashboard_1",
+        "name": "Read MES Metrics",
+        "func": "let data = global.get('mesData') || {};\nreturn [\n  { payload: data.downtimeSeconds || 0 },\n  { payload: data.availability || 0 },\n  { payload: data.performance || 0 },\n  { payload: data.quality || 0 },\n  { payload: data.oee || 0 }\n];",
+        "outputs": 5,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 280,
+        "wires": [
+            [
+                "ui_text_downtime"
+            ],
+            [
+                "ui_gauge_availability"
+            ],
+            [
+                "ui_gauge_performance"
+            ],
+            [
+                "ui_gauge_quality"
+            ],
+            [
+                "ui_gauge_oee"
+            ]
+        ]
+    },
+    {
+        "id": "ui_text_state",
+        "type": "ui-text",
+        "z": "tab_mes_dashboard_1",
+        "group": "ui_group_1",
+        "order": 1,
+        "width": 3,
+        "height": 1,
+        "name": "Machine State",
+        "label": "State",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 570,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "ui_text_count",
+        "type": "ui-text",
+        "z": "tab_mes_dashboard_1",
+        "group": "ui_group_1",
+        "order": 2,
+        "width": 3,
+        "height": 1,
+        "name": "Production Count",
+        "label": "Count",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 580,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "ui_gauge_temp",
+        "type": "ui-gauge",
+        "z": "tab_mes_dashboard_1",
+        "name": "Temperature",
+        "group": "ui_group_1",
+        "order": 3,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "title": "",
+        "alwaysShowTitle": false,
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [],
+        "min": 0,
+        "max": 120,
+        "sizeThickness": "",
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 570,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_text_downtime",
+        "type": "ui-text",
+        "z": "tab_mes_dashboard_1",
+        "group": "ui_group_1",
+        "order": 4,
+        "width": 3,
+        "height": 1,
+        "name": "Downtime Seconds",
+        "label": "Downtime (sec)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 590,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "ui_gauge_availability",
+        "type": "ui-gauge",
+        "z": "tab_mes_dashboard_1",
+        "name": "Availability",
+        "group": "ui_group_1",
+        "order": 5,
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "min": 0,
+        "max": 100,
+        "x": 600,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_gauge_performance",
+        "type": "ui-gauge",
+        "z": "tab_mes_dashboard_1",
+        "name": "Performance",
+        "group": "ui_group_1",
+        "order": 6,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "title": "",
+        "alwaysShowTitle": false,
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [],
+        "min": 0,
+        "max": "150",
+        "sizeThickness": "",
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 600,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_gauge_quality",
+        "type": "ui-gauge",
+        "z": "tab_mes_dashboard_1",
+        "name": "Quality",
+        "group": "ui_group_1",
+        "order": 7,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "title": "",
+        "alwaysShowTitle": false,
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [],
+        "min": 0,
+        "max": 100,
+        "sizeThickness": "",
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 590,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_gauge_oee",
+        "type": "ui-gauge",
+        "z": "tab_mes_dashboard_1",
+        "name": "OEE",
+        "group": "ui_group_1",
+        "order": 8,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "title": "",
+        "alwaysShowTitle": false,
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [],
+        "min": 0,
+        "max": 100,
+        "sizeThickness": "",
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 560,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "04212fcdc8061ddd",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@flowfuse/node-red-dashboard": "1.30.2"
+        }
+    }
+]
